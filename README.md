@@ -22,7 +22,7 @@ Un générateur de visages basé sur l'architecture **DDPM** (Denoising Diffusio
 1. Cloner le projet
 
 ```sh
-git clone 
+git clone https://github.com/ArthurGuerrier/FaceGenerator.git
 cd FaceGenerator
 ```
 
