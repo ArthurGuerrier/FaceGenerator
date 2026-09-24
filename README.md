@@ -1,23 +1,15 @@
-# 🎭 Face Generator (DDPM)
+# Face Generator (DDPM)
 
 Un générateur de visages basé sur l'architecture **DDPM** (Denoising Diffusion Probabilistic Models) implémenté from scratch avec PyTorch. Ce projet permet de générer des visages réalistes à partir de bruit aléatoire en utilisant un modèle U-Net pré-entraîné.
 
-## ✨ Fonctionnalités
-
-- 🧠 **Architecture U-Net personnalisée** avec blocs résiduels et attention
-- ⚡ **Génération optimisée** : Utilisation des poids EMA pour une meilleure qualité
-- 💾 **Léger et rapide** : Pas de dépendances lourdes comme matplotlib
-- 🖼️ **Visualisation native** : Ouverture automatique des images sous Windows
-- 🚀 **Simple d'utilisation** : Un seul script pour tout lancer
-
-## 📋 Prérequis
+## Prérequis
 
 - Python 3.10+
 - CUDA compatible GPU (recommandé pour la vitesse de génération)
 - Un fichier checkpoint `.pth` issu de l'entraînement
 
 
-## 🛠️ Installation
+## Installation
 
 1. Cloner le projet
 
@@ -48,7 +40,7 @@ pip install diffusers accelerate transformers tqdm pillow
 
 ## Génération d'images
 
-Assure-toi d'avoir placé ton fichier de checkpoint (ex: checkpoint.pth) à la racine du projet ou d'avoir mis à jour le chemin dans generate.py.
+Assurez-vous d'avoir placé votre fichier de checkpoint (ex: checkpoint.pth) à la racine du projet ou d'avoir mis à jour le chemin dans generate.py.
 
 ```sh
 python generate.py
@@ -59,9 +51,9 @@ num_images: Nombre d'images à générer (défaut: 1).
 checkpoint_path: Chemin vers ton fichier .pth.
 seed: Pour la reproductibilité (optionnel).
 
-🖼️ Sous Windows, la première image générée s'ouvrira automatiquement dans l'application Photos.
+Sous Windows, la première image générée s'ouvrira automatiquement dans l'application Photos.
 
-📂 Structure du projet
+Structure du projet
 
 FaceGenerator/
 ├── generate.py       # Script de génération d'images
@@ -72,7 +64,7 @@ FaceGenerator/
     └── ...
 
 
-## ⚙️ Configuration
+## Configuration
 
 Les paramètres principaux sont centralisés dans le dictionnaire CONFIG au début du script :
 
@@ -83,8 +75,8 @@ Les paramètres principaux sont centralisés dans le dictionnaire CONFIG au déb
 | `time_embed_dim` | Dimension de l'embedding temporel | 256 |
 
 
-## 🤝 Contribution
+## Contribution
 Les contributions sont les bienvenues ! N'hésite pas à ouvrir une issue ou une pull request si tu souhaites améliorer l'architecture ou ajouter des fonctionnalités.
 
-## 📄 Licence
+## Licence
 Ce projet est open-source. Voir le fichier LICENSE pour plus de détails.
