@@ -7,9 +7,7 @@ import os
 import math
 import sys
 
-# ============================================================
-# CONFIGURATION
-# ============================================================
+
 CONFIG = {
     'device': torch.device("cuda" if torch.cuda.is_available() else "cpu"),
     'image_size': 64,
@@ -23,11 +21,8 @@ CONFIG = {
 os.makedirs(CONFIG['output_dir'], exist_ok=True)
 
 
-# ============================================================
-# UTILS
-# ============================================================
+
 def get_timestep_embedding(timesteps, embedding_dim, max_period=10000):
-    """Create sinusoidal timestep embeddings."""
     half = embedding_dim // 2
     freqs = torch.exp(
         -math.log(max_period) * 
@@ -93,35 +88,27 @@ class SimpleUNet(nn.Module):
         )
         
         self.conv_in = nn.Conv2d(3, 64, 3, padding=1)
-        
         self.down1_b1 = ResnetBlock(64, 64, time_embed_dim)
         self.down1_b2 = ResnetBlock(64, 64, time_embed_dim)
         self.downsample1 = nn.Conv2d(64, 128, 3, stride=2, padding=1)
-        
         self.down2_b1 = ResnetBlock(128, 128, time_embed_dim)
         self.down2_b2 = ResnetBlock(128, 128, time_embed_dim)
         self.downsample2 = nn.Conv2d(128, 256, 3, stride=2, padding=1)
-        
         self.down3_b1 = ResnetBlock(256, 256, time_embed_dim)
         self.down3_b2 = ResnetBlock(256, 256, time_embed_dim)
         self.downsample3 = nn.Conv2d(256, 512, 3, stride=2, padding=1)
-        
         self.mid_block1 = ResnetBlock(512, 512, time_embed_dim)
         self.mid_attn = AttentionBlock(512)
         self.mid_block2 = ResnetBlock(512, 512, time_embed_dim)
-        
         self.upsample3 = nn.ConvTranspose2d(512, 256, 3, stride=2, padding=1, output_padding=1)
         self.up3_b1 = ResnetBlock(512, 256, time_embed_dim)
         self.up3_b2 = ResnetBlock(256, 256, time_embed_dim)
-        
         self.upsample2 = nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=1)
         self.up2_b1 = ResnetBlock(256, 128, time_embed_dim)
         self.up2_b2 = ResnetBlock(128, 128, time_embed_dim)
-        
         self.upsample1 = nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=1)
         self.up1_b1 = ResnetBlock(128, 64, time_embed_dim)
         self.up1_b2 = ResnetBlock(64, 64, time_embed_dim)
-        
         self.norm_out = nn.GroupNorm(8, 64)
         self.conv_out = nn.Conv2d(64, 3, 3, padding=1)
         self.act = nn.SiLU()
@@ -134,31 +121,25 @@ class SimpleUNet(nn.Module):
         h = self.down1_b2(h, temb)
         d1 = h
         h = self.downsample1(h)
-        
         h = self.down2_b1(h, temb)
         h = self.down2_b2(h, temb)
         d2 = h
         h = self.downsample2(h)
-        
         h = self.down3_b1(h, temb)
         h = self.down3_b2(h, temb)
         d3 = h
         h = self.downsample3(h)
-        
         h = self.mid_block1(h, temb)
         h = self.mid_attn(h)
         h = self.mid_block2(h, temb)
-        
         h = self.upsample3(h)
         h = torch.cat([h, d3], dim=1)
         h = self.up3_b1(h, temb)
         h = self.up3_b2(h, temb)
-        
         h = self.upsample2(h)
         h = torch.cat([h, d2], dim=1)
         h = self.up2_b1(h, temb)
         h = self.up2_b2(h, temb)
-        
         h = self.upsample1(h)
         h = torch.cat([h, d1], dim=1)
         h = self.up1_b1(h, temb)
@@ -167,11 +148,7 @@ class SimpleUNet(nn.Module):
         return self.conv_out(self.act(self.norm_out(h)))
 
 
-# ============================================================
-# GENERATION & SAVING
-# ============================================================
 def generate_images(model, scheduler_ddpm, num_images=None, seed=None):
-    """Generate images from the model."""
     if num_images is None:
         num_images = CONFIG['num_images']
     
@@ -179,7 +156,7 @@ def generate_images(model, scheduler_ddpm, num_images=None, seed=None):
         torch.manual_seed(seed)
     
     model.eval()
-    print(f"🎨 Generating {num_images} images...")
+    print(f"Generating {num_images} images...")
     
     with torch.no_grad():
         x = torch.randn(
@@ -200,7 +177,6 @@ def generate_images(model, scheduler_ddpm, num_images=None, seed=None):
 
 
 def save_generated_images(images, prefix="generated"):
-    """Save generated images to disk."""
     saved_paths = []
     
     for i in range(images.shape[0]):
@@ -208,36 +184,30 @@ def save_generated_images(images, prefix="generated"):
         filepath = os.path.join(CONFIG['output_dir'], filename)
         utils.save_image(images[i], filepath)
         saved_paths.append(filepath)
-        print(f"✓ Saved: {filepath}")
+        print(f"Saved: {filepath}")
     
     return saved_paths
 
 
 def open_with_windows_photos(filepath):
-    """Open image with Windows Photos app."""
     if sys.platform == "win32":
         try:
-            # Ouvre avec l'application Photos Windows par défaut
             os.startfile(filepath)
-            print(f"🖼️ Opened with Windows Photos: {filepath}")
+            print(f"Opened with Windows Photos: {filepath}")
         except Exception as e:
-            print(f"⚠️ Could not open image automatically: {e}")
+            print(f"Could not open image automatically: {e}")
     else:
-        print(f"ℹ️ Auto-open only available on Windows. Image saved at: {filepath}")
+        print(f"Auto-open only available on Windows. Image saved at: {filepath}")
 
 
-# ============================================================
-# MAIN
-# ============================================================
 def main():
-    """Load checkpoint and generate images."""
     if not os.path.exists(CONFIG['checkpoint_path']):
         raise FileNotFoundError(
             f"Checkpoint not found: {CONFIG['checkpoint_path']}\n"
             "Make sure you've trained the model first."
         )
     
-    print(f"📂 Loading checkpoint from: {CONFIG['checkpoint_path']}")
+    print(f"Loading checkpoint from: {CONFIG['checkpoint_path']}")
     
     model = SimpleUNet().to(CONFIG['device'])
     scheduler_ddpm = DDPMScheduler(
@@ -249,10 +219,10 @@ def main():
     
     if 'ema' in checkpoint:
         model.load_state_dict(checkpoint['ema'])
-        print("✓ Loaded EMA weights")
+        print("Loaded EMA weights")
     elif 'model' in checkpoint:
         model.load_state_dict(checkpoint['model'])
-        print("✓ Loaded model weights")
+        print("Loaded model weights")
     else:
         raise ValueError("Checkpoint doesn't contain valid weights")
     
@@ -261,15 +231,13 @@ def main():
     if 'loss' in checkpoint:
         print(f"  Loss: {checkpoint['loss']:.4f}")
     
-    # Generate and save
     images = generate_images(model, scheduler_ddpm)
     saved_paths = save_generated_images(images, prefix="faces")
     
-    # Open first generated image with Windows Photos
     if saved_paths:
         open_with_windows_photos(saved_paths[0])
     
-    print("\n🎉 Generation complete!")
+    print("\nGeneration complete!")
     print(f"Images saved to: {CONFIG['output_dir']}")
 
 
